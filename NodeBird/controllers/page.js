@@ -1,4 +1,4 @@
-const { User, Post } = require("../models");
+const { User, Post, Hashtag } = require("../models");
 
 exports.renderProfile = (req, res) => {
     res.render("profile", { title: "내 정보 - NodeBird" });
@@ -6,14 +6,6 @@ exports.renderProfile = (req, res) => {
 
 exports.renderJoin = (req, res) => {
     res.render("join", { title: "회원가입 - NodeBird" });
-};
-
-exports.renderMain = (req, res, next) => {
-    const twits = [];
-    res.render("main", {
-        title: "NodeBird",
-        twits,
-    });
 };
 
 exports.renderMain = async (req, res, next) => {
@@ -32,5 +24,27 @@ exports.renderMain = async (req, res, next) => {
     } catch (err) {
         console.error(err);
         next(err);
+    }
+};
+
+exports.renderHashtag = async (req, res, next) => {
+    const query = req.query.hashtag;
+    if (!query) {
+        return res.redirect("/");
+    }
+    try {
+        const hashtag = await Hashtag.findOne({ where: { title: query } });
+        let posts = [];
+        if (hashtag) {
+            posts = await hashtag.getPosts({ include: [{ model: User }] });
+        }
+
+        return res.render("main", {
+            title: `${query} | NodeBird`,
+            twits: posts,
+        });
+    } catch (error) {
+        console.error(error);
+        return next(error);
     }
 };
