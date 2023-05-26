@@ -52,6 +52,7 @@ class User extends Sequelize.Model {
             as: "Followings",
             through: "Follow",
         });
+        db.User.hasMany(db.Domain);
     }
 }
 
